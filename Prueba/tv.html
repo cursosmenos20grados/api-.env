@@ -1,156 +1,226 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>App Streaming - Proyecto Personal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plantilla Test Streaming (HLS)</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
-    :root { --bg: #0b0b0b; --accent: #ff0000; --card: #1a1a1a; }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
-    .container { max-width: 800px; margin: auto; }
-    video { width: 100%; border-radius: 10px; background: #000; aspect-ratio: 16/9; margin-bottom: 10px; }
-    .search-box { margin-bottom: 20px; width: 100%; }
-    #buscador {
-      width: 100%; padding: 12px; border-radius: 25px; border: none;
-      background: #222; color: white; box-sizing: border-box; outline: none;
+    :root { --bg:#0b0b0b; --card:#171717; --muted:#a7a7a7; --accent:#ff2a2a; }
+    body { margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:#fff; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 18px; }
+    h1 { font-size: 18px; margin: 0 0 10px; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    video { width:100%; background:#000; border-radius:12px; aspect-ratio:16/9; }
+    .panel { background:var(--card); border:1px solid #2a2a2a; border-radius:12px; padding:12px; margin-top:12px; }
+    select, input, button {
+      background:#101010; color:#fff; border:1px solid #2a2a2a; border-radius:10px;
+      padding:10px 12px; outline:none;
     }
-    .grid-canales {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 15px;
-    }
-    .canal-card {
-      background: var(--card); padding: 15px; border-radius: 12px;
-      text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid #333;
-    }
-    .canal-card:hover { border-color: var(--accent); transform: scale(1.05); }
-    .canal-card img { width: 60px; height: 40px; object-fit: contain; margin-bottom: 8px; }
+    button { cursor:pointer; }
+    button.primary { border-color: var(--accent); }
+    .muted { color:var(--muted); font-size: 12px; line-height: 1.4; }
+    .log { white-space:pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+           font-size: 12px; color:#ddd; background:#0a0a0a; border:1px solid #222; border-radius:10px; padding:10px;
+           max-height: 220px; overflow:auto; }
+    .badge { display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid #2a2a2a; font-size:12px; color:#ddd; }
+    .ok { border-color:#1f8b4c; color:#b6ffcc; }
+    .warn { border-color:#8b6b1f; color:#ffe3a6; }
   </style>
 </head>
 <body>
+  <div class="wrap">
+    <h1>Plantilla para probar streaming HLS (.m3u8)</h1>
 
-<div class="container">
-  <h2 style="text-align:center">⚽ Mi Pelota Libre</h2>
+    <video id="player" controls playsinline></video>
 
-  <video id="reproductor" controls playsinline></video>
+    <div class="panel">
+      <div class="row">
+        <label class="badge" id="engineBadge">Detectando…</label>
 
-  <div class="search-box">
-    <input type="text" id="buscador" placeholder="Buscar canal (ej: ESPN, NASA...)" onkeyup="filtrar()">
+        <select id="channelSelect" title="Canales">
+          <!-- se llena por JS -->
+        </select>
+
+        <button class="primary" id="btnPlay">Reproducir</button>
+        <button id="btnStop">Stop</button>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="row">
+        <input id="customUrl" style="flex:1; min-width:260px"
+               placeholder="Pegar URL .m3u8 manual (opcional) y luego Reproducir" />
+        <button id="btnCopyUrl">Copiar URL actual</button>
+      </div>
+
+      <p class="muted">
+        Motor:
+        <b>Safari/iOS</b> intenta HLS nativo (<code>video.src = m3u8</code>).
+        <b>Chrome/Firefox/Edge</b> usa <code>hls.js</code> si está soportado.
+        Si ves errores tipo <b>CORS</b>, el problema es del servidor del stream (no del HTML).
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="row">
+        <button id="btnClearLog">Limpiar log</button>
+      </div>
+      <div style="height:10px"></div>
+      <div class="log" id="log"></div>
+    </div>
   </div>
 
-  <div class="grid-canales" id="listaCanales"></div>
-</div>
-
 <script>
-  const canales = [
-    { nombre: "Canal de Prueba", url: "https://test-streams.mux.dev/x36xhzz/url_6/14500/14500.m3u8", logo: "https://cdn-icons-png.flaticon.com/512/716/716429.png" },
-    { nombre: "NASA Live", url: "https://ntv1.akamaized.net/hls/live/2014049/NASA-HTTP-TV-1/master.m3u8", logo: "https://www.nasa.gov/favicon.ico" },
-    { nombre: "ESPN Premium", url: "AQUI_PEGA_EL_M3U8", logo: "https://upload.wikimedia.org/wikipedia/commons/b/bc/ESPN_Premium.png" }
+  // 3 canales de ejemplo (legales/de prueba). Reemplazá por tus HLS.
+  const channels = [
+    {
+      name: "Test (Mux x36xhzz)",
+      url: "https://test-streams.mux.dev/x36xhzz/url_6/14500/14500.m3u8"
+    },
+    {
+      name: "NASA TV",
+      url: "https://ntv1.akamaized.net/hls/live/2014049/NASA-HTTP-TV-1/master.m3u8"
+    },
+    {
+      name: "Sintel (test)",
+      url: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8"
+    }
   ];
 
-  const video = document.getElementById('reproductor');
-  const grid = document.getElementById('listaCanales');
+  const player = document.getElementById('player');
+  const sel = document.getElementById('channelSelect');
+  const customUrl = document.getElementById('customUrl');
+  const logEl = document.getElementById('log');
+  const engineBadge = document.getElementById('engineBadge');
 
   let hls = null;
 
-  function logError(titulo, detalle) {
-    console.error(titulo, detalle || "");
-    alert(titulo + (detalle ? ("\n\n" + detalle) : ""));
+  function log(...args) {
+    const line = args.map(a => typeof a === 'string' ? a : JSON.stringify(a, null, 2)).join(' ');
+    logEl.textContent += line + "\n";
+    logEl.scrollTop = logEl.scrollHeight;
+    console.log(...args);
   }
 
-  async function intentarPlay() {
-    try {
-      // Importante: algunos navegadores bloquean play() si no hubo interacción.
-      await video.play();
-    } catch (e) {
-      console.warn("play() falló:", e);
-      // Muestra el motivo real (NotAllowedError, etc.)
-      logError("No se pudo iniciar la reproducción.", e && e.message ? e.message : String(e));
+  function detectEngine() {
+    const canNative = player.canPlayType('application/vnd.apple.mpegurl');
+    const canHlsjs = window.Hls && Hls.isSupported();
+
+    if (canNative) {
+      engineBadge.textContent = "Motor: HLS nativo (Safari/iOS)";
+      engineBadge.className = "badge ok";
+      return "native";
     }
-  }
-
-  function limpiarReproductor() {
-    // Detener reproducción actual
-    video.pause();
-    video.removeAttribute('src');
-    video.load();
-
-    if (hls) {
-      try { hls.destroy(); } catch (_) {}
-      hls = null;
+    if (canHlsjs) {
+      engineBadge.textContent = "Motor: hls.js (Chrome/Firefox/Edge)";
+      engineBadge.className = "badge ok";
+      return "hlsjs";
     }
+    engineBadge.textContent = "Motor: sin soporte HLS";
+    engineBadge.className = "badge warn";
+    return "none";
   }
 
-  function reproducir(url) {
-    limpiarReproductor();
+  function currentUrl() {
+    const manual = customUrl.value.trim();
+    if (manual) return manual;
+    return sel.value;
+  }
 
-    // 1) Safari/iOS: HLS nativo
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = url;
-      // En iOS muchas veces requiere click del usuario igualmente.
-      video.addEventListener('loadedmetadata', () => {
-        intentarPlay();
-      }, { once: true });
+  function stop() {
+    log("STOP");
+    if (hls) { hls.destroy(); hls = null; }
+    player.pause();
+    player.removeAttribute('src');
+    player.load();
+  }
 
-      video.addEventListener('error', () => {
-        const err = video.error;
-        logError("Error del reproductor nativo (Safari/iOS).",
-          err ? `code=${err.code}` : "Error desconocido");
-      }, { once: true });
+  async function play(url) {
+    stop();
+    const engine = detectEngine();
 
+    log("Play URL:", url);
+    log("Engine:", engine);
+
+    // Importante: GitHub "blob" NO ejecuta HTML. Usá GitHub Pages o servidor.
+
+    if (!url) return;
+
+    if (engine === "native") {
+      // Safari/iOS
+      player.src = url;
+      try {
+        await player.play();
+        log("Native play() OK");
+      } catch (e) {
+        log("Native play() ERROR:", String(e));
+      }
       return;
     }
 
-    // 2) Chrome/Firefox/Edge: hls.js
-    if (window.Hls && Hls.isSupported()) {
+    if (engine === "hlsjs") {
       hls = new Hls({
-        // Puedes ajustar para streams problemáticos:
-        // lowLatencyMode: true,
-        // enableWorker: true,
+        // Si tu servidor permite CORS, esto ayuda. Si NO permite CORS, igual va a fallar.
+        // xhrSetup: (xhr) => { xhr.withCredentials = false; }
       });
 
-      hls.on(Hls.Events.ERROR, function (event, data) {
-        console.error("HLS.js ERROR:", data);
-        // Errores típicos: manifestLoadError (CORS/404), fragLoadError, etc.
-        const info = `type=${data.type}\ndetails=${data.details}\nfatal=${data.fatal}\nstatus=${data.response?.code || ""}`;
-        if (data.fatal) logError("Error fatal cargando el streaming.", info);
+      hls.on(Hls.Events.ERROR, (evt, data) => {
+        log("HLS.js ERROR:", data);
+      });
+
+      hls.on(Hls.Events.MEDIA_ATTACHED, () => log("HLS.js media attached"));
+      hls.on(Hls.Events.MANIFEST_LOADING, () => log("HLS.js manifest loading"));
+      hls.on(Hls.Events.MANIFEST_PARSED, async () => {
+        log("HLS.js manifest parsed -> play()");
+        try {
+          await player.play();
+          log("hls.js play() OK");
+        } catch (e) {
+          log("hls.js play() ERROR:", String(e));
+        }
       });
 
       hls.loadSource(url);
-      hls.attachMedia(video);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, function () {
-        intentarPlay();
-      });
-
+      hls.attachMedia(player);
       return;
     }
 
-    logError("Tu navegador no soporta HLS.", "Prueba en Chrome/Edge/Firefox o Safari (iPhone/iPad).");
+    log("No hay soporte HLS en este navegador.");
+    alert("Este navegador no soporta HLS nativo ni hls.js.");
   }
 
-  function render(filtro = "") {
-    grid.innerHTML = "";
-    canales
-      .filter(c => c.nombre.toLowerCase().includes(filtro.toLowerCase()))
-      .forEach(c => {
-        const div = document.createElement('div');
-        div.className = 'canal-card';
-        div.innerHTML = `<img src="${c.logo}" alt=""><div>${c.nombre}</div>`;
-        div.onclick = () => {
-          if (c.url.includes("AQUI_PEGA")) return alert("Busca el enlace m3u8 primero");
-          reproducir(c.url);
-        };
-        grid.appendChild(div);
-      });
-  }
+  // UI init
+  channels.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.url;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
 
-  function filtrar() {
-    const busqueda = document.getElementById('buscador').value;
-    render(busqueda);
-  }
+  detectEngine();
 
-  render();
+  document.getElementById('btnPlay').addEventListener('click', () => play(currentUrl()));
+  document.getElementById('btnStop').addEventListener('click', stop);
+  document.getElementById('btnClearLog').addEventListener('click', () => logEl.textContent = "");
+  document.getElementById('btnCopyUrl').addEventListener('click', async () => {
+    const url = currentUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+      log("URL copiada al portapapeles:", url);
+    } catch {
+      log("No se pudo copiar (permiso del navegador). URL:", url);
+    }
+  });
+
+  // Logs útiles de video
+  player.addEventListener('error', () => {
+    const err = player.error;
+    log("VIDEO error event. code:", err ? err.code : null, "message:", err ? err.message : null);
+    // code 4 en Safari = no se pudo cargar/decodificar el recurso (URL, CORS/ATS, codec, 403/404, etc.)
+  });
+  player.addEventListener('loadedmetadata', () => log("VIDEO loadedmetadata"));
+  player.addEventListener('canplay', () => log("VIDEO canplay"));
 </script>
 </body>
 </html>

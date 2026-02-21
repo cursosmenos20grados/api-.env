@@ -1,11 +1,86 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prueba TV</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Streaming - Proyecto Personal</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        :root { --bg: #0b0b0b; --accent: #ff0000; --card: #1a1a1a; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
+        .container { max-width: 800px; margin: auto; }
+        video { width: 100%; border-radius: 10px; background: #000; aspect-ratio: 16/9; margin-bottom: 10px; }
+        
+        /* Buscador */
+        .search-box { margin-bottom: 20px; width: 100%; }
+        #buscador { 
+            width: 100%; padding: 12px; border-radius: 25px; border: none; 
+            background: #222; color: white; box-sizing: border-box; outline: none;
+        }
+
+        .grid-canales { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+            gap: 15px; 
+        }
+        .canal-card { 
+            background: var(--card); padding: 15px; border-radius: 12px; 
+            text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid #333;
+        }
+        .canal-card:hover { border-color: var(--accent); transform: scale(1.05); }
+        .canal-card img { width: 60px; height: 40px; object-fit: contain; margin-bottom: 8px; }
+    </style>
 </head>
 <body>
 
+<div class="container">
+    <h2 style="text-align:center">⚽ Mi Pelota Libre</h2>
+    
+    <video id="reproductor" controls playsinline></video>
+    
+    <div class="search-box">
+        <input type="text" id="buscador" placeholder="Buscar canal (ej: ESPN, NASA...)" onkeyup="filtrar()">
+    </div>
+
+    <div class="grid-canales" id="listaCanales"></div>
+</div>
+
+<script>
+    // Lista de canales - Aquí es donde pegarás los enlaces que encuentres
+    const canales = [
+        { nombre: "Canal de Prueba", url: "https://test-streams.mux.dev/x36xhzz/url_6/14500/14500.m3u8", logo: "https://cdn-icons-png.flaticon.com/512/716/716429.png" },
+        { nombre: "NASA Live", url: "https://ntv1.akamaized.net/hls/live/2014049/NASA-HTTP-TV-1/master.m3u8", logo: "https://www.nasa.gov/favicon.ico" },
+        { nombre: "ESPN Premium", url: "AQUI_PEGA_EL_M3U8", logo: "https://upload.wikimedia.org/wikipedia/commons/b/bc/ESPN_Premium.png" }
+    ];
+
+    const video = document.getElementById('reproductor');
+    const grid = document.getElementById('listaCanales');
+    let hls = new Hls();
+
+    function render(filtro = "") {
+        grid.innerHTML = "";
+        canales.filter(c => c.nombre.toLowerCase().includes(filtro.toLowerCase())).forEach(c => {
+            const div = document.createElement('div');
+            div.className = 'canal-card';
+            div.innerHTML = `<img src="${c.logo}"><div>${c.nombre}</div>`;
+            div.onclick = () => {
+                if(c.url.includes("AQUI_PEGA")) return alert("Busca el enlace m3u8 primero");
+                if (Hls.isSupported()) {
+                    hls.destroy(); hls = new Hls();
+                    hls.loadSource(c.url); hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+                }
+            };
+            grid.appendChild(div);
+        });
+    }
+
+    function filtrar() {
+        const busqueda = document.getElementById('buscador').value;
+        render(busqueda);
+    }
+
+    render(); // Carga inicial
+</script>
 </body>
 </html>

@@ -3,42 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Argentina - Acceso Directo</title>
+    <title>Argentina TV & Deportes</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; }
-        .header { margin-bottom: 30px; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; max-width: 400px; margin: auto; }
+        :root { --deportes: #00ff88; --youtube: #ff0000; --bg: #0b0f1a; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; text-align: center; margin: 0; padding: 15px; }
         
-        /* Estilo de botones */
-        .btn { display: block; padding: 20px; text-decoration: none; color: white; font-weight: bold; border-radius: 12px; font-size: 18px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .seccion { margin-bottom: 25px; padding: 15px; background: #161b2c; border-radius: 15px; border: 1px solid #2d364f; }
         
-        .tn { background: linear-gradient(90deg, #ec1c24, #8b0000); }
-        .tvp { background: linear-gradient(90deg, #22c55e, #166534); }
-        .c5n { background: linear-gradient(90deg, #ef4444, #b91c1c); border: 2px solid white; }
-        .ln { background: linear-gradient(90deg, #1e40af, #1e3a8a); }
-        .america { background: linear-gradient(90deg, #f59e0b, #b45309); }
+        /* Reproductor de Video */
+        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 10px; border: 2px solid var(--deportes); }
+        video { width: 100%; height: 100%; }
 
-        .footer { margin-top: 40px; font-size: 12px; color: #94a3b8; }
+        /* Botonera */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; border: none; transition: 0.3s; }
+        
+        .btn-yt { background: #2a2f3e; color: #ff4d4d; border: 1px solid #ff4d4d; }
+        .btn-espn { background: var(--deportes); color: #000; width: 100%; margin-top: 10px; }
+        
+        input { width: 90%; padding: 12px; margin-top: 10px; border-radius: 5px; border: none; background: #0b0f1a; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1 style="color: #38bdf8; margin: 0;">TV ARGENTINA</h1>
-        <p>Selecciona un canal para ver en vivo</p>
+    <h2 style="color: var(--deportes); text-transform: uppercase;">Estadio Digital</h2>
+
+    <div class="seccion">
+        <div class="video-container">
+            <video id="videoPlayer" controls playsinline poster="https://img.freepik.com/vector-premium/fondo-verde-cesped-futbol-lineas-campo-futbol_431668-385.jpg"></video>
+        </div>
+        <p style="font-size: 12px; color: var(--deportes);">Pega aquí tu link de ESPN / TNT Sports:</p>
+        <input type="text" id="m3u8Link" placeholder="https://ejemplo.com/canal.m3u8">
+        <button class="btn btn-espn" onclick="cargarM3U8()">CARGAR SEÑAL DEPORTIVA</button>
     </div>
 
-    <div class="grid">
-        <a href="https://www.youtube.com/c/todonoticias/live" target="_blank" class="btn tn">TN EN VIVO</a>
-        <a href="https://www.youtube.com/c/tvpublica/live" target="_blank" class="btn tvp">TV PÚBLICA</a>
-        <a href="https://www.youtube.com/c/C5N/live" target="_blank" class="btn c5n">C5N EN VIVO</a>
-        <a href="https://www.youtube.com/c/lanacionmas/live" target="_blank" class="btn ln">LN+ EN VIVO</a>
-        <a href="https://www.youtube.com/c/americatv/live" target="_blank" class="btn america">AMÉRICA TV</a>
+    <div class="seccion">
+        <p style="color: #94a3b8;">Canales Oficiales (YouTube)</p>
+        <div class="grid">
+            <a href="https://www.youtube.com/c/todonoticias/live" target="_blank" class="btn btn-yt">TN VIVO</a>
+            <a href="https://www.youtube.com/c/tvpublica/live" target="_blank" class="btn btn-yt">TV PÚBLICA</a>
+            <a href="https://www.youtube.com/c/C5N/live" target="_blank" class="btn btn-yt">C5N</a>
+            <a href="https://www.youtube.com/c/americatv/live" target="_blank" class="btn btn-yt">AMÉRICA</a>
+        </div>
     </div>
 
-    <div class="footer">
-        <p>Si el canal no carga, asegúrate de tener la app de YouTube actualizada.</p>
-    </div>
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const hls = new Hls();
 
+        function cargarM3U8() {
+            const url = document.getElementById('m3u8Link').value;
+            if (!url) return alert("Por favor, pega un link válido.");
+
+            if (Hls.isSupported()) {
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.play();
+            }
+        }
+    </script>
 </body>
 </html>

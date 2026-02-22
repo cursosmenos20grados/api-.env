@@ -1,82 +1,70 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Argentina TV - Premium</title>
+    <title>TV Argentina Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        :root { --primary: #00d2ff; --bg: #0f172a; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
-        .container { max-width: 900px; margin: auto; }
-        
-        /* Reproductor Estilizado */
-        .video-wrapper { position: relative; background: #000; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); aspect-ratio: 16 / 9; }
-        video { width: 100%; height: 100%; }
-
-        /* Grilla de Canales */
-        .grid-canales { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-top: 25px; }
-        
-        .canal-card { background: #1e293b; border: 2px solid transparent; border-radius: 12px; padding: 10px; cursor: pointer; transition: 0.3s; text-align: center; }
-        .canal-card:hover { border-color: var(--primary); transform: translateY(-3px); background: #334155; }
-        .canal-card img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-        .canal-card span { display: block; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-
-        h1 { font-weight: 300; font-size: 1.5rem; letter-spacing: 2px; color: var(--primary); }
+        :root { --accent: #00fbff; --bg: #050a14; }
+        body { font-family: sans-serif; background: var(--bg); color: white; text-align: center; margin: 0; padding: 10px; }
+        .player-box { width: 100%; max-width: 600px; margin: auto; background: #000; border: 2px solid #1e293b; border-radius: 12px; overflow: hidden; }
+        video { width: 100%; aspect-ratio: 16/9; display: block; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 600px; margin: 20px auto; }
+        .btn { background: #111827; border: 1px solid #374151; padding: 15px; border-radius: 10px; cursor: pointer; }
+        .btn img { width: 40px; height: 40px; pointer-events: none; }
+        .btn span { display: block; font-size: 12px; margin-top: 5px; color: var(--accent); }
+        .debug-btn { background: #dc2626; color: white; padding: 10px; border: none; border-radius: 5px; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>TV ARGENTINA LIVE</h1>
-    
-    <div class="video-wrapper">
-        <video id="video" controls autoplay playsinline></video>
+    <h2 style="color: var(--accent); font-weight: 300;">TV ARGENTINA</h2>
+
+    <div class="player-box">
+        <video id="video" controls playsinline></video>
     </div>
 
-    <div class="grid-canales">
-        <div class="canal-card" onclick="playStream('https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/Canal_9_Argentina_logo_2021.png" alt="9">
-            <span>Canal 9</span>
-        </div>
+    <button class="debug-btn" onclick="location.reload()">🔄 RECARGAR SI NO CARGA</button>
 
-        <div class="canal-card" onclick="playStream('https://siloh-mcdn.plutotv.net/lilo/production/LATAM/Telefe/master.m3u8')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Telefe_logo.svg/1200px-Telefe_logo.svg.png" alt="11">
-            <span>Telefe</span>
+    <div class="grid">
+        <div class="btn" onclick="playStream('https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/Canal_9_Argentina_logo_2021.png">
+            <span>CANAL 9</span>
         </div>
-
-        <div class="canal-card" onclick="playStream('https://unlimited1-us.dps.live/televidaar/televidaar.smil/playlist.m3u8')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Am%C3%A9rica_TV_logo_2021.svg/1200px-Am%C3%A9rica_TV_logo_2021.svg.png" alt="2">
-            <span>América</span>
+        <div class="btn" onclick="playStream('https://siloh-mcdn.plutotv.net/lilo/production/LATAM/Telefe/master.m3u8')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Telefe_logo.svg/200px-Telefe_logo.svg.png">
+            <span>TELEFE</span>
         </div>
-
-        <div class="canal-card" onclick="playStream('https://live-mendoza.vustreams.com/live/eltrece/playlist.m3u8')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/El_Trece_logo.svg/1200px-El_Trece_logo.svg.png" alt="13">
-            <span>El Trece</span>
+        <div class="btn" onclick="playStream('https://unlimited1-us.dps.live/televidaar/televidaar.smil/playlist.m3u8')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Am%C3%A9rica_TV_logo_2021.svg/200px-Am%C3%A9rica_TV_logo_2021.svg.png">
+            <span>AMÉRICA</span>
+        </div>
+        <div class="btn" onclick="playStream('https://live-mendoza.vustreams.com/live/eltrece/playlist.m3u8')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/El_Trece_logo.svg/200px-El_Trece_logo.svg.png">
+            <span>EL TRECE</span>
         </div>
     </div>
-</div>
 
-<script>
-    const video = document.getElementById('video');
-    const hls = new Hls({
-        capLevelToPlayerSize: true,
-        debug: false
-    });
+    <script>
+        const video = document.getElementById('video');
+        const hls = new Hls();
 
-    function playStream(url) {
-        if (Hls.isSupported()) {
-            hls.loadSource(url);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => console.log("Autoplay bloqueado")));
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = url;
+        function playStream(url) {
+            if (Hls.isSupported()) {
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.play().catch(e => alert("Toca el play en el video para iniciar"));
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.play();
+            }
         }
-    }
 
-    // Canal inicial por defecto (Canal 9 por estabilidad)
-    playStream('https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8');
-</script>
-
+        // Iniciar con Canal 9 por defecto
+        window.onload = () => playStream('https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8');
+    </script>
 </body>
 </html>

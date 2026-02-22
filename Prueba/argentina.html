@@ -3,72 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Argentina - Ultra Compatible</title>
+    <title>TV Argentina Estable</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { font-family: sans-serif; background: #000; color: white; text-align: center; padding: 10px; }
-        .reproductor { width: 100%; max-width: 500px; margin: auto; background: #111; border: 1px solid #333; }
-        video { width: 100%; aspect-ratio: 16/9; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .card { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #444; }
-        .card h3 { font-size: 14px; margin: 5px 0; }
-        .btn-play { background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; width: 100%; font-weight: bold; margin-top: 5px; text-decoration: none; display: inline-block; font-size: 12px; }
-        .btn-directo { background: #28a745; margin-top: 5px; }
+        body { font-family: sans-serif; background: #0a0f1e; color: white; text-align: center; margin: 0; padding: 15px; }
+        .contenedor-reproductor { width: 100%; max-width: 600px; margin: auto; background: #000; border-radius: 10px; border: 2px solid #222; overflow: hidden; }
+        video { width: 100%; aspect-ratio: 16/9; display: block; }
+        .lista-canales { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 600px; margin: 20px auto; }
+        .boton-canal { background: #1a2238; border: 1px solid #334155; padding: 15px; border-radius: 8px; cursor: pointer; color: #00d2ff; font-weight: bold; }
+        .boton-canal:active { background: #00d2ff; color: black; }
+        .info { font-size: 12px; color: #64748b; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h3>ESTADO: <span id="status" style="color: yellow;">Esperando selección...</span></h3>
+    <h2 style="color: #00d2ff;">TV ARGENTINA LIVE</h2>
 
-    <div class="reproductor">
+    <div class="contenedor-reproductor">
         <video id="video" controls playsinline></video>
     </div>
 
-    <div class="grid">
-        <div class="card">
-            <h3>CANAL 9</h3>
-            <button class="btn-play" onclick="cargar('https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8', 'Canal 9')">VER AQUÍ</button>
-            <a href="https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8" class="btn-play btn-directo">ABRIR DIRECTO</a>
-        </div>
+    <p class="info">Si el video no carga, toca un canal y luego dale al botón PLAY</p>
 
-        <div class="card">
-            <h3>TELEFE (Noticias)</h3>
-            <button class="btn-play" onclick="cargar('https://siloh-mcdn.plutotv.net/lilo/production/LATAM/Telefe/master.m3u8', 'Telefe')">VER AQUÍ</button>
-            <a href="https://siloh-mcdn.plutotv.net/lilo/production/LATAM/Telefe/master.m3u8" class="btn-play btn-directo">ABRIR DIRECTO</a>
-        </div>
-
-        <div class="card">
-            <h3>AMÉRICA TV</h3>
-            <button class="btn-play" onclick="cargar('https://unlimited1-us.dps.live/televidaar/televidaar.smil/playlist.m3u8', 'América')">VER AQUÍ</button>
-            <a href="https://unlimited1-us.dps.live/televidaar/televidaar.smil/playlist.m3u8" class="btn-play btn-directo">ABRIR DIRECTO</a>
-        </div>
-
-        <div class="card">
-            <h3>EL TRECE</h3>
-            <button class="btn-play" onclick="cargar('https://live-mendoza.vustreams.com/live/eltrece/playlist.m3u8', 'El Trece')">VER AQUÍ</button>
-            <a href="https://live-mendoza.vustreams.com/live/eltrece/playlist.m3u8" class="btn-play btn-directo">ABRIR DIRECTO</a>
-        </div>
+    <div class="lista-canales">
+        <div class="boton-canal" onclick="cargarVideo('https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8')">CANAL 9</div>
+        <div class="boton-canal" onclick="cargarVideo('https://siloh-mcdn.plutotv.net/lilo/production/LATAM/Telefe/master.m3u8')">TELEFE NOTICIAS</div>
+        <div class="boton-canal" onclick="cargarVideo('https://unlimited1-us.dps.live/televidaar/televidaar.smil/playlist.m3u8')">AMÉRICA (Mza)</div>
+        <div class="boton-canal" onclick="cargarVideo('https://live-mendoza.vustreams.com/live/eltrece/playlist.m3u8')">EL TRECE (Mza)</div>
     </div>
 
     <script>
         const video = document.getElementById('video');
-        const status = document.getElementById('status');
         const hls = new Hls();
 
-        function cargar(url, nombre) {
-            status.innerText = "Cargando " + nombre + "...";
+        function cargarVideo(url) {
             if (Hls.isSupported()) {
                 hls.loadSource(url);
                 hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
                     video.play();
-                    status.innerText = "Reproduciendo " + nombre;
                 });
-            } else {
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Para iPhone/Safari
                 video.src = url;
-                status.innerText = "Modo Nativo: " + nombre;
+                video.play();
             }
         }
+
+        // Cargar Canal 9 por defecto al abrir
+        window.onload = () => cargarVideo('https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8');
     </script>
+
 </body>
 </html>

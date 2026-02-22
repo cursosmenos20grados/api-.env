@@ -3,37 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Argentina - Estable</title>
+    <title>TV Argentina - Acceso Directo</title>
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; margin: 0; padding: 10px; }
-        .main-reproductor { width: 100%; max-width: 700px; margin: auto; aspect-ratio: 16/9; background: #000; border: 2px solid #334155; border-radius: 10px; overflow: hidden; }
-        iframe { width: 100%; height: 100%; border: none; }
-        .grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 700px; margin: 20px auto; }
-        .btn-tv { background: #1e293b; color: #38bdf8; border: 1px solid #38bdf8; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; }
-        .btn-tv:active { background: #38bdf8; color: white; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; }
+        .header { margin-bottom: 30px; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; max-width: 400px; margin: auto; }
+        
+        /* Estilo de botones */
+        .btn { display: block; padding: 20px; text-decoration: none; color: white; font-weight: bold; border-radius: 12px; font-size: 18px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        
+        .tn { background: linear-gradient(90deg, #ec1c24, #8b0000); }
+        .tvp { background: linear-gradient(90deg, #22c55e, #166534); }
+        .c5n { background: linear-gradient(90deg, #ef4444, #b91c1c); border: 2px solid white; }
+        .ln { background: linear-gradient(90deg, #1e40af, #1e3a8a); }
+        .america { background: linear-gradient(90deg, #f59e0b, #b45309); }
+
+        .footer { margin-top: 40px; font-size: 12px; color: #94a3b8; }
     </style>
 </head>
 <body>
 
-    <h2 style="color: #38bdf8;">TV ARGENTINA EN VIVO</h2>
-
-    <div class="main-reproductor" id="contenedor">
-        <iframe id="reproductor" src="https://www.youtube.com/embed/live_stream?channel=UCj6PcyLvPN_O-V6_Ly8O9Ew&autoplay=1" allowfullscreen allow="autoplay"></iframe>
+    <div class="header">
+        <h1 style="color: #38bdf8; margin: 0;">TV ARGENTINA</h1>
+        <p>Selecciona un canal para ver en vivo</p>
     </div>
 
-    <div class="grid-botones">
-        <button class="btn-tv" onclick="cambiarCanal('UCj6PcyLvPN_O-V6_Ly8O9Ew')">TN (Todo Noticias)</button>
-        <button class="btn-tv" onclick="cambiarCanal('UCdtV8U6_L98-Oit_q-nN32A')">TV PÚBLICA</button>
-        <button class="btn-tv" onclick="cambiarCanal('UC_m7pS6WshR036f_pPCHsNw')">C5N</button>
-        <button class="btn-tv" onclick="cambiarCanal('UC5OnInIStL8atT78_7NAt7w')">LN+</button>
+    <div class="grid">
+        <a href="https://www.youtube.com/c/todonoticias/live" target="_blank" class="btn tn">TN EN VIVO</a>
+        <a href="https://www.youtube.com/c/tvpublica/live" target="_blank" class="btn tvp">TV PÚBLICA</a>
+        <a href="https://www.youtube.com/c/C5N/live" target="_blank" class="btn c5n">C5N EN VIVO</a>
+        <a href="https://www.youtube.com/c/lanacionmas/live" target="_blank" class="btn ln">LN+ EN VIVO</a>
+        <a href="https://www.youtube.com/c/americatv/live" target="_blank" class="btn america">AMÉRICA TV</a>
     </div>
 
-    <script>
-        function cambiarCanal(idCanal) {
-            const iframe = document.getElementById('reproductor');
-            iframe.src = "https://www.youtube.com/embed/live_stream?channel=" + idCanal + "&autoplay=1";
-        }
-    </script>
+    <div class="footer">
+        <p>Si el canal no carga, asegúrate de tener la app de YouTube actualizada.</p>
+    </div>
 
 </body>
 </html>

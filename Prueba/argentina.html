@@ -3,68 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Argentina Pro</title>
+    <title>TV Argentina - Ultra Compatible</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        :root { --accent: #00fbff; --bg: #050a14; }
-        body { font-family: sans-serif; background: var(--bg); color: white; text-align: center; margin: 0; padding: 10px; }
-        .player-box { width: 100%; max-width: 600px; margin: auto; background: #000; border: 2px solid #1e293b; border-radius: 12px; overflow: hidden; }
-        video { width: 100%; aspect-ratio: 16/9; display: block; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 600px; margin: 20px auto; }
-        .btn { background: #111827; border: 1px solid #374151; padding: 15px; border-radius: 10px; cursor: pointer; }
-        .btn img { width: 40px; height: 40px; pointer-events: none; }
-        .btn span { display: block; font-size: 12px; margin-top: 5px; color: var(--accent); }
-        .debug-btn { background: #dc2626; color: white; padding: 10px; border: none; border-radius: 5px; margin-top: 10px; font-weight: bold; }
+        body { font-family: sans-serif; background: #000; color: white; text-align: center; padding: 10px; }
+        .reproductor { width: 100%; max-width: 500px; margin: auto; background: #111; border: 1px solid #333; }
+        video { width: 100%; aspect-ratio: 16/9; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .card { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #444; }
+        .card h3 { font-size: 14px; margin: 5px 0; }
+        .btn-play { background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; width: 100%; font-weight: bold; margin-top: 5px; text-decoration: none; display: inline-block; font-size: 12px; }
+        .btn-directo { background: #28a745; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <h2 style="color: var(--accent); font-weight: 300;">TV ARGENTINA</h2>
+    <h3>ESTADO: <span id="status" style="color: yellow;">Esperando selección...</span></h3>
 
-    <div class="player-box">
+    <div class="reproductor">
         <video id="video" controls playsinline></video>
     </div>
 
-    <button class="debug-btn" onclick="location.reload()">🔄 RECARGAR SI NO CARGA</button>
-
     <div class="grid">
-        <div class="btn" onclick="playStream('https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/Canal_9_Argentina_logo_2021.png">
-            <span>CANAL 9</span>
+        <div class="card">
+            <h3>CANAL 9</h3>
+            <button class="btn-play" onclick="cargar('https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8', 'Canal 9')">VER AQUÍ</button>
+            <a href="https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8" class="btn-play btn-directo">ABRIR DIRECTO</a>
         </div>
-        <div class="btn" onclick="playStream('https://siloh-mcdn.plutotv.net/lilo/production/LATAM/Telefe/master.m3u8')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Telefe_logo.svg/200px-Telefe_logo.svg.png">
-            <span>TELEFE</span>
+
+        <div class="card">
+            <h3>TELEFE (Noticias)</h3>
+            <button class="btn-play" onclick="cargar('https://siloh-mcdn.plutotv.net/lilo/production/LATAM/Telefe/master.m3u8', 'Telefe')">VER AQUÍ</button>
+            <a href="https://siloh-mcdn.plutotv.net/lilo/production/LATAM/Telefe/master.m3u8" class="btn-play btn-directo">ABRIR DIRECTO</a>
         </div>
-        <div class="btn" onclick="playStream('https://unlimited1-us.dps.live/televidaar/televidaar.smil/playlist.m3u8')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Am%C3%A9rica_TV_logo_2021.svg/200px-Am%C3%A9rica_TV_logo_2021.svg.png">
-            <span>AMÉRICA</span>
+
+        <div class="card">
+            <h3>AMÉRICA TV</h3>
+            <button class="btn-play" onclick="cargar('https://unlimited1-us.dps.live/televidaar/televidaar.smil/playlist.m3u8', 'América')">VER AQUÍ</button>
+            <a href="https://unlimited1-us.dps.live/televidaar/televidaar.smil/playlist.m3u8" class="btn-play btn-directo">ABRIR DIRECTO</a>
         </div>
-        <div class="btn" onclick="playStream('https://live-mendoza.vustreams.com/live/eltrece/playlist.m3u8')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/El_Trece_logo.svg/200px-El_Trece_logo.svg.png">
-            <span>EL TRECE</span>
+
+        <div class="card">
+            <h3>EL TRECE</h3>
+            <button class="btn-play" onclick="cargar('https://live-mendoza.vustreams.com/live/eltrece/playlist.m3u8', 'El Trece')">VER AQUÍ</button>
+            <a href="https://live-mendoza.vustreams.com/live/eltrece/playlist.m3u8" class="btn-play btn-directo">ABRIR DIRECTO</a>
         </div>
     </div>
 
     <script>
         const video = document.getElementById('video');
+        const status = document.getElementById('status');
         const hls = new Hls();
 
-        function playStream(url) {
+        function cargar(url, nombre) {
+            status.innerText = "Cargando " + nombre + "...";
             if (Hls.isSupported()) {
                 hls.loadSource(url);
                 hls.attachMedia(video);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    video.play().catch(e => alert("Toca el play en el video para iniciar"));
+                    video.play();
+                    status.innerText = "Reproduciendo " + nombre;
                 });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            } else {
                 video.src = url;
-                video.play();
+                status.innerText = "Modo Nativo: " + nombre;
             }
         }
-
-        // Iniciar con Canal 9 por defecto
-        window.onload = () => playStream('https://octubre-live.cdn.vustreams.com/live/channel09/live.isml/live.m3u8');
     </script>
 </body>
 </html>
